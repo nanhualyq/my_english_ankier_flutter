@@ -35,6 +35,17 @@ class ArticlesNotifier extends StateNotifier<List<Article>> {
     await loadArticles(); // Refresh list
   }
 
+  // Save as (copy article with " 副本" suffix)
+  Future<int> saveAsArticle(Article original) async {
+    final copy = original.copyWith(
+      id: null,
+      title: '${original.title} 副本',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    return await addArticle(copy);
+  }
+
   // Search articles
   Future<void> searchArticles(String query) async {
     if (query.isEmpty) {

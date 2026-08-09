@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -33,6 +33,7 @@ class DatabaseHelper {
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         translated_content TEXT,
+        url TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       )
@@ -55,8 +56,11 @@ class DatabaseHelper {
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    // Handle database migrations here
-    // For now, we're at version 1, so no migrations needed
+    // Handle database migrations
+    if (oldVersion < 2) {
+      // Add url column to articles table
+      await db.execute('ALTER TABLE articles ADD COLUMN url TEXT');
+    }
   }
 
   Future<void> close() async {

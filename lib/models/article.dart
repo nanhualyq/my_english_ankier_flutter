@@ -3,6 +3,7 @@ class Article {
   final String title;
   final String content;
   final String? translatedContent;
+  final String? url;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -11,6 +12,7 @@ class Article {
     required this.title,
     required this.content,
     this.translatedContent,
+    this.url,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -23,6 +25,7 @@ class Article {
       'title': title,
       'content': content,
       'translated_content': translatedContent,
+      'url': url,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
     };
@@ -35,6 +38,7 @@ class Article {
       title: map['title'] as String,
       content: map['content'] as String,
       translatedContent: map['translated_content'] as String?,
+      url: map['url'] as String?,
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at'] as int),
     );
@@ -46,6 +50,7 @@ class Article {
     String? title,
     String? content,
     String? translatedContent,
+    String? url,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -54,6 +59,7 @@ class Article {
       title: title ?? this.title,
       content: content ?? this.content,
       translatedContent: translatedContent ?? this.translatedContent,
+      url: url ?? this.url,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

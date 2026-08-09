@@ -1,4 +1,3 @@
-import 'package:sqflite/sqflite.dart';
 import '../models/skill_progress.dart';
 import '../models/skill_type.dart';
 import 'database_helper.dart';
@@ -92,6 +91,11 @@ class SkillProgressDao {
       where: 'article_id = ?',
       whereArgs: [articleId],
     );
+  }
+
+  // Reset all skill progress for an article (alias for deleteSkillProgressForArticle)
+  Future<int> resetProgressForArticle(int articleId) async {
+    return await deleteSkillProgressForArticle(articleId);
   }
 
   // Initialize all four skill types for a new article

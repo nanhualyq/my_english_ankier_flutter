@@ -84,7 +84,7 @@ void main() {
         lastLinePosition: 10,
       );
 
-      final id = await skillProgressDao.createSkillProgress(progress);
+      await skillProgressDao.createSkillProgress(progress);
       final retrieved = await skillProgressDao.getSkillProgress(articleId, SkillType.reading);
 
       final updated = retrieved!.copyWith(lastLinePosition: 25);

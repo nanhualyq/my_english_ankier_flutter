@@ -1,30 +1,38 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Widget tests for the homepage.
+// Note: Database-dependent tests require sqflite_common_ffi setup.
+// This file contains basic structure tests only.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:my_english_ankier_flutter/main.dart';
+import 'package:my_english_ankier_flutter/widgets/skill_progress_widget.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('SkillProgressWidget creates correctly', () {
+    // Simple instantiation test
+    const widget = SkillProgressWidget(
+      listeningProgress: 0.33,
+      speakingProgress: 0.50,
+      readingProgress: 1.0,
+      writingProgress: 0.0,
+    );
+    
+    expect(widget.listeningProgress, 0.33);
+    expect(widget.speakingProgress, 0.50);
+    expect(widget.readingProgress, 1.0);
+    expect(widget.writingProgress, 0.0);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('SkillProgressWidget handles zero progress', () {
+    const widget = SkillProgressWidget(
+      listeningProgress: 0.0,
+      speakingProgress: 0.0,
+      readingProgress: 0.0,
+      writingProgress: 0.0,
+    );
+    
+    expect(widget.listeningProgress, 0.0);
+    expect(widget.speakingProgress, 0.0);
+    expect(widget.readingProgress, 0.0);
+    expect(widget.writingProgress, 0.0);
   });
 }

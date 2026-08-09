@@ -37,7 +37,9 @@ dependencies:
   
   # SQLite database for local storage
   sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
   path_provider: ^2.1.1
+  path: ^1.8.0
   
   # State management
   flutter_riverpod: ^2.4.9
