@@ -7,6 +7,7 @@ class SkillProgressWidget extends StatelessWidget {
   final double speakingProgress;
   final double readingProgress;
   final double writingProgress;
+  final VoidCallback? onReadingTap;
 
   const SkillProgressWidget({
     super.key,
@@ -14,6 +15,7 @@ class SkillProgressWidget extends StatelessWidget {
     required this.speakingProgress,
     required this.readingProgress,
     required this.writingProgress,
+    this.onReadingTap,
   });
 
   Color _progressColor(double progress) {
@@ -23,26 +25,29 @@ class SkillProgressWidget extends StatelessWidget {
     return Colors.blue;
   }
 
-  Widget _skillItem(String icon, double progress) {
+  Widget _skillItem(String icon, double progress, {VoidCallback? onTap}) {
     final percent = (progress * 100).round();
     final color = _progressColor(progress);
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 2),
-          Text(
-            '$percent%',
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 14)),
+            const SizedBox(width: 2),
+            Text(
+              '$percent%',
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -53,7 +58,7 @@ class SkillProgressWidget extends StatelessWidget {
       children: [
         _skillItem('🎧', listeningProgress),
         _skillItem('🗣️', speakingProgress),
-        _skillItem('📖', readingProgress),
+        _skillItem('📖', readingProgress, onTap: onReadingTap),
         _skillItem('✍️', writingProgress),
       ],
     );

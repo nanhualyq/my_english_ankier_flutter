@@ -5,6 +5,7 @@ import '../providers/articles_provider.dart';
 import '../database/skill_progress_dao.dart';
 import '../widgets/article_card.dart';
 import 'article_edit_page.dart';
+import 'reading_practice_page.dart';
 
 /// Homepage displaying the list of English articles with CRUD operations.
 class HomePage extends ConsumerWidget {
@@ -75,6 +76,7 @@ class HomePage extends ConsumerWidget {
           onSaveAs: () => _saveAsArticle(context, ref, article),
           onResetProgress: () => _resetProgress(context, ref, article),
           onDelete: () => _deleteArticle(context, ref, article),
+          onReadingPractice: () => _openReadingPractice(context, article),
         );
       },
     );
@@ -140,5 +142,13 @@ class HomePage extends ConsumerWidget {
     Article article,
   ) async {
     await ref.read(articlesProvider.notifier).deleteArticle(article.id!);
+  }
+
+  void _openReadingPractice(BuildContext context, Article article) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReadingPracticePage(article: article),
+      ),
+    );
   }
 }

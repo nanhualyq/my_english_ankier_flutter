@@ -13,6 +13,7 @@ class ArticleCard extends ConsumerWidget {
   final VoidCallback onSaveAs;
   final VoidCallback onResetProgress;
   final VoidCallback onDelete;
+  final VoidCallback onReadingPractice;
 
   const ArticleCard({
     super.key,
@@ -21,6 +22,7 @@ class ArticleCard extends ConsumerWidget {
     required this.onSaveAs,
     required this.onResetProgress,
     required this.onDelete,
+    required this.onReadingPractice,
   });
 
   @override
@@ -94,6 +96,7 @@ class ArticleCard extends ConsumerWidget {
             _ProgressRow(
               articleId: article.id!,
               totalLines: article.totalLines,
+              onReadingTap: onReadingPractice,
             ),
           ],
         ),
@@ -169,8 +172,13 @@ class ArticleCard extends ConsumerWidget {
 class _ProgressRow extends ConsumerWidget {
   final int articleId;
   final int totalLines;
+  final VoidCallback? onReadingTap;
 
-  const _ProgressRow({required this.articleId, required this.totalLines});
+  const _ProgressRow({
+    required this.articleId,
+    required this.totalLines,
+    this.onReadingTap,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -180,11 +188,12 @@ class _ProgressRow extends ConsumerWidget {
       future: dao.getSkillProgressForArticle(articleId),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SkillProgressWidget(
+          return SkillProgressWidget(
             listeningProgress: 0,
             speakingProgress: 0,
             readingProgress: 0,
             writingProgress: 0,
+            onReadingTap: onReadingTap,
           );
         }
 
@@ -202,6 +211,7 @@ class _ProgressRow extends ConsumerWidget {
           speakingProgress: getProgress(SkillType.speaking.name),
           readingProgress: getProgress(SkillType.reading.name),
           writingProgress: getProgress(SkillType.writing.name),
+          onReadingTap: onReadingTap,
         );
       },
     );
