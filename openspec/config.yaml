@@ -5,11 +5,11 @@ githubCopilot:
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Language convention: All user-facing UI text (buttons, labels, SnackBars, tooltips, error messages,
+  empty state text) must be in English. Use English for all string literals in widget code.
+  This prepares the app for future i18n/localization support.
+  Planning artifacts (proposal, spec, design, tasks) may use Chinese for developer readability.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.

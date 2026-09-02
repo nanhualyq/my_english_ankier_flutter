@@ -1,30 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/article.dart';
+import '../models/selected_content.dart';
 
-/// 阅读练习页面，支持逐行显示原文和译文切换
-class ReadingPracticePage extends StatelessWidget {
+/// 阅读练习页面，支持逐行显示原文和译文切换，以及文本选中与提取
+class ReadingPracticePage extends StatefulWidget {
   final Article article;
 
   const ReadingPracticePage({super.key, required this.article});
 
   @override
+  State<ReadingPracticePage> createState() => _ReadingPracticePageState();
+}
+
+class _ReadingPracticePageState extends State<ReadingPracticePage> {
+  /// 当前选中的内容，null 表示无选区
+  SelectedContent? _selection;
+
+  /// 处理子组件传递上来的选中事件
+  void _onContentSelected(SelectedContent? selection) {
+    setState(() {
+      _selection = selection;
+    });
+  }
+
+  /// 复制选中文本到剪贴板
+  Future<void> _copyToClipboard() async {
+    if (_selection == null) return;
+    await Clipboard.setData(ClipboardData(text: _selection!.selectedText));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied: ${_selection!.selectedText}'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  /// 提取选中内容（预留 Anki 接口）
+  void _extractSelection() {
+    if (_selection == null) return;
+    // TODO: 后续接入 Anki，此处先用 SnackBar 提示
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Extracted L${_selection!.lineNumber}: "${_selection!.selectedText}"',
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     // 解析文章内容为行列表
-    final lines = article.content.split('\n');
+    final lines = widget.article.content.split('\n');
     // 解析译文为列表（如果存在）
-    final translations = article.translatedContent?.split('\n') ?? [];
+    final translations = widget.article.translatedContent?.split('\n') ?? [];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          article.title,
+          widget.article.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: article.content.isEmpty
+      body: widget.article.content.isEmpty
           ? _buildEmptyState(context)
-          : _buildContentList(lines, translations),
+          : Stack(
+              children: [
+                _buildContentList(lines, translations),
+                // 底部浮动选区栏
+                if (_selection != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: _SelectionBar(
+                      selection: _selection!,
+                      onCopy: _copyToClipboard,
+                      onExtract: _extractSelection,
+                      onDismiss: () => _onContentSelected(null),
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 
@@ -41,7 +104,7 @@ class ReadingPracticePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '文章内容为空',
+            'Article content is empty',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -54,19 +117,99 @@ class ReadingPracticePage extends StatelessWidget {
   /// 构建内容列表
   Widget _buildContentList(List<String> lines, List<String> translations) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       itemCount: lines.length,
       itemBuilder: (context, index) {
         final line = lines[index];
-        // 获取对应译文（如果存在）
-        final translation = index < translations.length ? translations[index] : null;
+        final translation =
+            index < translations.length ? translations[index] : null;
 
         return ReadingLineItem(
           lineNumber: index + 1,
           text: line,
           translation: translation,
+          onSelected: _onContentSelected,
         );
       },
+    );
+  }
+}
+
+/// 底部浮动选区操作栏
+class _SelectionBar extends StatelessWidget {
+  final SelectedContent selection;
+  final VoidCallback onCopy;
+  final VoidCallback onExtract;
+  final VoidCallback onDismiss;
+
+  const _SelectionBar({
+    required this.selection,
+    required this.onCopy,
+    required this.onExtract,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 8,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              // 行号标签
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'L${selection.lineNumber}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // 选中文本预览（截断过长文本）
+              Expanded(
+                child: Text(
+                  selection.selectedText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+              // 操作按钮
+              IconButton(
+                icon: const Icon(Icons.copy, size: 20),
+                tooltip: 'Copy',
+                onPressed: onCopy,
+              ),
+              IconButton(
+                icon: const Icon(Icons.bookmark_add_outlined, size: 20),
+                tooltip: 'Extract',
+                onPressed: onExtract,
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                tooltip: 'Close',
+                onPressed: onDismiss,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -76,12 +219,14 @@ class ReadingLineItem extends StatefulWidget {
   final int lineNumber;
   final String text;
   final String? translation;
+  final ValueChanged<SelectedContent?>? onSelected;
 
   const ReadingLineItem({
     super.key,
     required this.lineNumber,
     required this.text,
     this.translation,
+    this.onSelected,
   });
 
   @override
@@ -91,9 +236,57 @@ class ReadingLineItem extends StatefulWidget {
 class _ReadingLineItemState extends State<ReadingLineItem> {
   bool _isExpanded = false;
 
+  /// 处理原文选区变化
+  void _onOriginalSelectionChanged(
+      TextSelection selection, SelectionChangedCause? cause) {
+    _handleSelection(selection, isTranslation: false);
+  }
+
+  /// 处理译文选区变化
+  void _onTranslationSelectionChanged(
+      TextSelection selection, SelectionChangedCause? cause) {
+    _handleSelection(selection, isTranslation: true);
+  }
+
+  /// 通用选区处理逻辑
+  void _handleSelection(TextSelection selection,
+      {required bool isTranslation}) {
+    final sourceText = isTranslation ? widget.translation! : widget.text;
+
+    // 折叠选区（光标点击无实际选中）→ 清除选区
+    if (selection.isCollapsed || selection.start < 0 || selection.end < 0) {
+      widget.onSelected?.call(null);
+      return;
+    }
+
+    // 安全截取选中文本
+    final start = selection.start.clamp(0, sourceText.length);
+    final end = selection.end.clamp(0, sourceText.length);
+    if (start >= end) {
+      widget.onSelected?.call(null);
+      return;
+    }
+
+    final selectedText = sourceText.substring(start, end);
+    if (selectedText.trim().isEmpty) {
+      widget.onSelected?.call(null);
+      return;
+    }
+
+    widget.onSelected?.call(SelectedContent(
+      lineNumber: widget.lineNumber,
+      lineText: widget.text,
+      selectedText: selectedText,
+      start: start,
+      end: end,
+      isTranslation: isTranslation,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasTranslation = widget.translation != null && widget.translation!.isNotEmpty;
+    final hasTranslation =
+        widget.translation != null && widget.translation!.isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -111,12 +304,13 @@ class _ReadingLineItemState extends State<ReadingLineItem> {
           // 原文区域
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
+            child: SelectableText(
               widget.text,
               style: const TextStyle(
                 fontSize: 16,
                 height: 1.5,
               ),
+              onSelectionChanged: _onOriginalSelectionChanged,
             ),
           ),
 
@@ -139,7 +333,7 @@ class _ReadingLineItemState extends State<ReadingLineItem> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _isExpanded ? '收起译文' : '显示译文',
+                      _isExpanded ? 'Hide translation' : 'Show translation',
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.blue,
@@ -166,13 +360,14 @@ class _ReadingLineItemState extends State<ReadingLineItem> {
                         ),
                       ),
                     ),
-                    child: Text(
+                    child: SelectableText(
                       widget.translation!,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
                         height: 1.5,
                       ),
+                      onSelectionChanged: _onTranslationSelectionChanged,
                     ),
                   )
                 : const SizedBox.shrink(),
