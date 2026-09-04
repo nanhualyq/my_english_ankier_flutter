@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/article.dart';
 import '../models/selected_content.dart';
+import '../services/anki_connect_service.dart';
 
 /// 阅读练习页面，支持逐行显示原文和译文切换，以及文本选中与提取
 class ReadingPracticePage extends StatefulWidget {
@@ -38,19 +39,84 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
     );
   }
 
-  /// 提取选中内容（预留 Anki 接口）
-  void _extractSelection() {
+  /// 发送选中内容到 Anki 的添加卡片界面
+  Future<void> _extractSelection() async {
     if (_selection == null) return;
-    // TODO: 后续接入 Anki，此处先用 SnackBar 提示
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Extracted L${_selection!.lineNumber}: "${_selection!.selectedText}"',
+
+    final anki = AnkiConnectService();
+
+    // 检查 AnkiConnect 是否可用
+    if (!await anki.isAvailable()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot connect to Anki. Is Anki running?'),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
         ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
+      );
+      return;
+    }
+
+    // 构建 Front 字段 HTML
+    final front = _buildFrontField();
+
+    try {
+      await anki.guiAddCards(
+        deckName: 'English',
+        modelName: '@Basic',
+        fields: {'Front': front, 'Back': ''},
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Anki Add Cards dialog opened'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Anki error: $e'),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  /// 构建 Front 字段的 HTML 内容
+  ///
+  /// 格式：最多3行上方上下文 + 当前行（选中部分用 <mark> 包裹）+ 隐藏时间戳
+  String _buildFrontField() {
+    final lines = widget.article.content.split('\n');
+    final sel = _selection!;
+    final currentIdx = sel.lineNumber - 1; // 0-based
+
+    // 上方最多3行上下文
+    final contextStart = (currentIdx - 3).clamp(0, currentIdx);
+    final buffer = StringBuffer();
+    for (var i = contextStart; i < currentIdx; i++) {
+      buffer.write('${lines[i]}<br>');
+    }
+
+    // 当前行：用 <mark> 包裹选中文本
+    final line = sel.lineText;
+    final before = line.substring(0, sel.start);
+    final selected = line.substring(sel.start, sel.end);
+    final after = line.substring(sel.end);
+    buffer.write(before);
+    buffer.write('<mark>$selected</mark>');
+    buffer.write(after);
+
+    // 隐藏时间戳（用于去重）
+    buffer.write(
+      '<span style="display:none">${DateTime.now().millisecondsSinceEpoch}</span>',
     );
+
+    return buffer.toString();
   }
 
   @override
