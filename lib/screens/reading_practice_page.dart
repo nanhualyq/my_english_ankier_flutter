@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/article.dart';
 import '../models/selected_content.dart';
 import '../services/anki_connect_service.dart';
+import '../services/youdao_dict_service.dart';
 
 /// 阅读练习页面，支持逐行显示原文和译文切换，以及文本选中与提取
 class ReadingPracticePage extends StatefulWidget {
@@ -58,6 +59,18 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
       return;
     }
 
+    // 查询有道词典释义
+    String back = '';
+    try {
+      final youdao = YoudaoDictService();
+      final result = await youdao.lookup(_selection!.selectedText);
+      if (result != null && result.hasEntries) {
+        back = result.toBackField();
+      }
+    } catch (_) {
+      // 查询失败时 back 为空，不影响流程
+    }
+
     // 构建 Front 字段 HTML
     final front = _buildFrontField();
 
@@ -65,7 +78,7 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
       await anki.guiAddCards(
         deckName: 'English',
         modelName: '@Basic',
-        fields: {'Front': front, 'Back': ''},
+        fields: {'Front': front, 'Back': back},
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
