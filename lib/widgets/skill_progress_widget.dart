@@ -8,6 +8,7 @@ class SkillProgressWidget extends StatelessWidget {
   final double readingProgress;
   final double writingProgress;
   final VoidCallback? onReadingTap;
+  final VoidCallback? onWritingTap;
 
   const SkillProgressWidget({
     super.key,
@@ -16,6 +17,7 @@ class SkillProgressWidget extends StatelessWidget {
     required this.readingProgress,
     required this.writingProgress,
     this.onReadingTap,
+    this.onWritingTap,
   });
 
   Color _progressColor(double progress) {
@@ -59,7 +61,7 @@ class SkillProgressWidget extends StatelessWidget {
         _skillItem('🎧', listeningProgress),
         _skillItem('🗣️', speakingProgress),
         _skillItem('📖', readingProgress, onTap: onReadingTap),
-        _skillItem('✍️', writingProgress),
+        _skillItem('✍️', writingProgress, onTap: onWritingTap),
       ],
     );
   }

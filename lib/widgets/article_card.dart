@@ -14,6 +14,7 @@ class ArticleCard extends ConsumerWidget {
   final VoidCallback onResetProgress;
   final VoidCallback onDelete;
   final VoidCallback onReadingPractice;
+  final VoidCallback onWritingPractice;
 
   const ArticleCard({
     super.key,
@@ -23,6 +24,7 @@ class ArticleCard extends ConsumerWidget {
     required this.onResetProgress,
     required this.onDelete,
     required this.onReadingPractice,
+    required this.onWritingPractice,
   });
 
   @override
@@ -97,6 +99,7 @@ class ArticleCard extends ConsumerWidget {
               articleId: article.id!,
               totalLines: article.totalLines,
               onReadingTap: onReadingPractice,
+              onWritingTap: onWritingPractice,
             ),
           ],
         ),
@@ -173,11 +176,13 @@ class _ProgressRow extends ConsumerWidget {
   final int articleId;
   final int totalLines;
   final VoidCallback? onReadingTap;
+  final VoidCallback? onWritingTap;
 
   const _ProgressRow({
     required this.articleId,
     required this.totalLines,
     this.onReadingTap,
+    this.onWritingTap,
   });
 
   @override
@@ -194,6 +199,7 @@ class _ProgressRow extends ConsumerWidget {
             readingProgress: 0,
             writingProgress: 0,
             onReadingTap: onReadingTap,
+            onWritingTap: onWritingTap,
           );
         }
 
@@ -212,6 +218,7 @@ class _ProgressRow extends ConsumerWidget {
           readingProgress: getProgress(SkillType.reading.name),
           writingProgress: getProgress(SkillType.writing.name),
           onReadingTap: onReadingTap,
+          onWritingTap: onWritingTap,
         );
       },
     );

@@ -3,22 +3,21 @@ import 'package:flutter/services.dart';
 import '../models/article.dart';
 import '../models/selected_content.dart';
 import '../services/anki_connect_service.dart';
-import '../services/youdao_dict_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
 import '../widgets/practice_selection_bar.dart';
 
-/// 阅读练习页面，支持逐行显示原文和译文切换，以及文本选中与提取
-class ReadingPracticePage extends StatefulWidget {
+/// 写作练习页面，支持逐行显示译文和原文切换，以及文本选中与提取
+class WritingPracticePage extends StatefulWidget {
   final Article article;
 
-  const ReadingPracticePage({super.key, required this.article});
+  const WritingPracticePage({super.key, required this.article});
 
   @override
-  State<ReadingPracticePage> createState() => _ReadingPracticePageState();
+  State<WritingPracticePage> createState() => _WritingPracticePageState();
 }
 
-class _ReadingPracticePageState extends State<ReadingPracticePage> {
+class _WritingPracticePageState extends State<WritingPracticePage> {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
 
@@ -62,20 +61,12 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
       return;
     }
 
-    // 查询有道词典释义
-    String back = '';
-    try {
-      final youdao = YoudaoDictService();
-      final result = await youdao.lookup(_selection!.selectedText);
-      if (result != null && result.hasEntries) {
-        back = result.toBackField();
-      }
-    } catch (_) {
-      // 查询失败时 back 为空，不影响流程
-    }
+    // 构建 Front 字段 HTML（使用译文内容）
+    final translatedContent = widget.article.translatedContent ?? '';
+    final front = buildAnkiFrontField(translatedContent, _selection!);
 
-    // 构建 Front 字段 HTML
-    final front = buildAnkiFrontField(widget.article.content, _selection!);
+    // Back 字段为空（写作页面不查询有道词典）
+    const back = '';
 
     try {
       await anki.guiAddCards(
@@ -103,14 +94,13 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    // 解析文章内容为行列表
-    final lines = widget.article.content.split('\n');
-    // 解析译文为列表（如果存在）
-    final translations = widget.article.translatedContent?.split('\n') ?? [];
+    // 解析译文为列表（主内容）
+    final translations =
+        widget.article.translatedContent?.split('\n') ?? [];
+    // 解析原文为列表（可展开内容）
+    final originalLines = widget.article.content.split('\n');
 
     return Scaffold(
       appBar: AppBar(
@@ -120,11 +110,11 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: widget.article.content.isEmpty
+      body: translations.isEmpty
           ? _buildEmptyState(context)
           : Stack(
               children: [
-                _buildContentList(lines, translations),
+                _buildContentList(translations, originalLines),
                 // 底部浮动选区栏
                 if (_selection != null)
                   Positioned(
@@ -143,20 +133,20 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
     );
   }
 
-  /// 文章内容为空时显示的提示
+  /// 译文为空时显示的提示
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.article_outlined,
+            Icons.translate_outlined,
             size: 80,
             color: Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
-            'Article content is empty',
+            'Translation is not available',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -167,26 +157,25 @@ class _ReadingPracticePageState extends State<ReadingPracticePage> {
   }
 
   /// 构建内容列表
-  Widget _buildContentList(List<String> lines, List<String> translations) {
+  Widget _buildContentList(
+      List<String> translations, List<String> originalLines) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-      itemCount: lines.length,
+      itemCount: translations.length,
       itemBuilder: (context, index) {
-        final line = lines[index];
-        final translation =
-            index < translations.length ? translations[index] : null;
+        final translation = translations[index];
+        final original =
+            index < originalLines.length ? originalLines[index] : null;
 
         return PracticeLineItem(
           lineNumber: index + 1,
-          primaryText: line,
-          secondaryText: translation,
-          primaryLabel: 'translation',
-          secondaryLabel: 'translation',
+          primaryText: translation,
+          secondaryText: original,
+          primaryLabel: 'original',
+          secondaryLabel: 'original',
           onSelected: _onContentSelected,
         );
       },
     );
   }
 }
-
-

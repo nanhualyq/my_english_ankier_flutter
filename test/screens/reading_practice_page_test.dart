@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_english_ankier_flutter/models/article.dart';
 import 'package:my_english_ankier_flutter/screens/reading_practice_page.dart';
+import 'package:my_english_ankier_flutter/widgets/practice_line_item.dart';
 
 void main() {
   group('ReadingPracticePage', () {
@@ -276,34 +277,38 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
-    testWidgets('ReadingLineItem should accept onSelected callback',
+    testWidgets('PracticeLineItem should accept onSelected callback',
         (tester) async {
       // Verify the widget accepts the callback without error
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReadingLineItem(
+            body: PracticeLineItem(
               lineNumber: 1,
-              text: 'Test text',
+              primaryText: 'Test text',
+              primaryLabel: 'translation',
+              secondaryLabel: 'translation',
               onSelected: (selection) {},
             ),
           ),
         ),
       );
 
-      expect(find.byType(ReadingLineItem), findsOneWidget);
+      expect(find.byType(PracticeLineItem), findsOneWidget);
       expect(find.byType(SelectableText), findsOneWidget);
     });
 
-    testWidgets('ReadingLineItem with callback and translation',
+    testWidgets('PracticeLineItem with callback and translation',
         (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReadingLineItem(
+            body: PracticeLineItem(
               lineNumber: 1,
-              text: 'Original',
-              translation: '译文',
+              primaryText: 'Original',
+              secondaryText: '译文',
+              primaryLabel: 'translation',
+              secondaryLabel: 'translation',
               onSelected: (selection) {},
             ),
           ),
@@ -318,15 +323,17 @@ void main() {
       expect(find.byType(SelectableText), findsNWidgets(2));
     });
 
-    testWidgets('ReadingLineItem without callback still works',
+    testWidgets('PracticeLineItem without callback still works',
         (tester) async {
       // Backward compatibility: onSelected is optional
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReadingLineItem(
+            body: PracticeLineItem(
               lineNumber: 1,
-              text: 'Test text',
+              primaryText: 'Test text',
+              primaryLabel: 'translation',
+              secondaryLabel: 'translation',
             ),
           ),
         ),
