@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/selected_content.dart';
 
 /// 通用逐行练习内容组件
-/// 用于阅读、写作等练习页面，支持主文本显示和次文本展开/折叠
+/// 用于阅读、写作、听力、口语等练习页面，支持主文本显示和次文本展开/折叠
 class PracticeLineItem extends StatefulWidget {
   final int lineNumber;
   final String primaryText;
@@ -10,6 +10,15 @@ class PracticeLineItem extends StatefulWidget {
   final String primaryLabel;
   final String secondaryLabel;
   final ValueChanged<SelectedContent?>? onSelected;
+
+  /// 是否显示主文本。听力模式传 false，默认只显示 TTS。
+  final bool showPrimaryText;
+
+  /// 主文本是否可通过展开/折叠控制可见性。听力模式传 true。
+  final bool primaryTextExpandable;
+
+  /// 主文本下方的附加组件（如 TTS 播放按钮）。
+  final Widget? trailing;
 
   const PracticeLineItem({
     super.key,
@@ -19,6 +28,9 @@ class PracticeLineItem extends StatefulWidget {
     required this.primaryLabel,
     required this.secondaryLabel,
     this.onSelected,
+    this.showPrimaryText = true,
+    this.primaryTextExpandable = false,
+    this.trailing,
   });
 
   @override
@@ -81,6 +93,9 @@ class _PracticeLineItemState extends State<PracticeLineItem> {
     final hasSecondary = widget.secondaryText != null &&
         widget.secondaryText!.isNotEmpty;
 
+    // 是否有展开/折叠需求（次文本 或 可展开的主文本）
+    final hasExpandable = hasSecondary || widget.primaryTextExpandable;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -94,21 +109,29 @@ class _PracticeLineItemState extends State<PracticeLineItem> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 主文本区域
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: SelectableText(
-              widget.primaryText,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.5,
+          // 主文本区域（当 showPrimaryText=true 且非 primaryTextExpandable 时始终显示）
+          if (widget.showPrimaryText && !widget.primaryTextExpandable)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: SelectableText(
+                widget.primaryText,
+                style: const TextStyle(
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+                onSelectionChanged: _onPrimarySelectionChanged,
               ),
-              onSelectionChanged: _onPrimarySelectionChanged,
             ),
-          ),
 
-          // 次文本切换控件（如果次文本存在）
-          if (hasSecondary)
+          // Trailing 附加组件（如 TTS 播放按钮）
+          if (widget.trailing != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: widget.trailing!,
+            ),
+
+          // 展开/折叠控件
+          if (hasExpandable)
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -139,36 +162,71 @@ class _PracticeLineItemState extends State<PracticeLineItem> {
               ),
             ),
 
-          // 次文本显示区域（展开后显示）
+          // 展开后的内容区域
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            child: _isExpanded && hasSecondary
-                ? Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.only(left: 12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Colors.grey[400]!,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                    child: SelectableText(
-                      widget.secondaryText!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                        height: 1.5,
-                      ),
-                      onSelectionChanged: _onSecondarySelectionChanged,
-                    ),
-                  )
+            child: _isExpanded
+                ? _buildExpandedContent(hasSecondary)
                 : const SizedBox.shrink(),
           ),
         ],
       ),
     );
+  }
+
+  /// 构建展开后的内容
+  Widget _buildExpandedContent(bool hasSecondary) {
+    // primaryTextExpandable 模式：展开后显示主文本
+    if (widget.primaryTextExpandable) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(left: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: Colors.grey[400]!,
+              width: 3,
+            ),
+          ),
+        ),
+        child: SelectableText(
+          widget.primaryText,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+            height: 1.5,
+          ),
+          onSelectionChanged: _onPrimarySelectionChanged,
+        ),
+      );
+    }
+
+    // 默认模式：展开后显示次文本
+    if (hasSecondary) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(left: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: Colors.grey[400]!,
+              width: 3,
+            ),
+          ),
+        ),
+        child: SelectableText(
+          widget.secondaryText!,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+            height: 1.5,
+          ),
+          onSelectionChanged: _onSecondarySelectionChanged,
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }

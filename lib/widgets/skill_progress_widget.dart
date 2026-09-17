@@ -7,6 +7,8 @@ class SkillProgressWidget extends StatelessWidget {
   final double speakingProgress;
   final double readingProgress;
   final double writingProgress;
+  final VoidCallback? onListeningTap;
+  final VoidCallback? onSpeakingTap;
   final VoidCallback? onReadingTap;
   final VoidCallback? onWritingTap;
 
@@ -16,6 +18,8 @@ class SkillProgressWidget extends StatelessWidget {
     required this.speakingProgress,
     required this.readingProgress,
     required this.writingProgress,
+    this.onListeningTap,
+    this.onSpeakingTap,
     this.onReadingTap,
     this.onWritingTap,
   });
@@ -58,8 +62,8 @@ class SkillProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _skillItem('🎧', listeningProgress),
-        _skillItem('🗣️', speakingProgress),
+        _skillItem('🎧', listeningProgress, onTap: onListeningTap),
+        _skillItem('🗣️', speakingProgress, onTap: onSpeakingTap),
         _skillItem('📖', readingProgress, onTap: onReadingTap),
         _skillItem('✍️', writingProgress, onTap: onWritingTap),
       ],

@@ -5,7 +5,9 @@ import '../providers/articles_provider.dart';
 import '../database/skill_progress_dao.dart';
 import '../widgets/article_card.dart';
 import 'article_edit_page.dart';
+import 'listening_practice_page.dart';
 import 'reading_practice_page.dart';
+import 'speaking_practice_page.dart';
 import 'writing_practice_page.dart';
 
 /// Homepage displaying the list of English articles with CRUD operations.
@@ -77,6 +79,8 @@ class HomePage extends ConsumerWidget {
           onSaveAs: () => _saveAsArticle(context, ref, article),
           onResetProgress: () => _resetProgress(context, ref, article),
           onDelete: () => _deleteArticle(context, ref, article),
+          onListeningPractice: () => _openListeningPractice(context, article),
+          onSpeakingPractice: () => _openSpeakingPractice(context, article),
           onReadingPractice: () => _openReadingPractice(context, article),
           onWritingPractice: () => _openWritingPractice(context, article),
         );
@@ -158,6 +162,22 @@ class HomePage extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => WritingPracticePage(article: article),
+      ),
+    );
+  }
+
+  void _openListeningPractice(BuildContext context, Article article) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ListeningPracticePage(article: article),
+      ),
+    );
+  }
+
+  void _openSpeakingPractice(BuildContext context, Article article) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SpeakingPracticePage(article: article),
       ),
     );
   }

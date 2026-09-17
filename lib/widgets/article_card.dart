@@ -13,6 +13,8 @@ class ArticleCard extends ConsumerWidget {
   final VoidCallback onSaveAs;
   final VoidCallback onResetProgress;
   final VoidCallback onDelete;
+  final VoidCallback onListeningPractice;
+  final VoidCallback onSpeakingPractice;
   final VoidCallback onReadingPractice;
   final VoidCallback onWritingPractice;
 
@@ -23,6 +25,8 @@ class ArticleCard extends ConsumerWidget {
     required this.onSaveAs,
     required this.onResetProgress,
     required this.onDelete,
+    required this.onListeningPractice,
+    required this.onSpeakingPractice,
     required this.onReadingPractice,
     required this.onWritingPractice,
   });
@@ -98,6 +102,8 @@ class ArticleCard extends ConsumerWidget {
             _ProgressRow(
               articleId: article.id!,
               totalLines: article.totalLines,
+              onListeningTap: onListeningPractice,
+              onSpeakingTap: onSpeakingPractice,
               onReadingTap: onReadingPractice,
               onWritingTap: onWritingPractice,
             ),
@@ -175,12 +181,16 @@ class ArticleCard extends ConsumerWidget {
 class _ProgressRow extends ConsumerWidget {
   final int articleId;
   final int totalLines;
+  final VoidCallback? onListeningTap;
+  final VoidCallback? onSpeakingTap;
   final VoidCallback? onReadingTap;
   final VoidCallback? onWritingTap;
 
   const _ProgressRow({
     required this.articleId,
     required this.totalLines,
+    this.onListeningTap,
+    this.onSpeakingTap,
     this.onReadingTap,
     this.onWritingTap,
   });
@@ -198,6 +208,8 @@ class _ProgressRow extends ConsumerWidget {
             speakingProgress: 0,
             readingProgress: 0,
             writingProgress: 0,
+            onListeningTap: onListeningTap,
+            onSpeakingTap: onSpeakingTap,
             onReadingTap: onReadingTap,
             onWritingTap: onWritingTap,
           );
@@ -217,6 +229,8 @@ class _ProgressRow extends ConsumerWidget {
           speakingProgress: getProgress(SkillType.speaking.name),
           readingProgress: getProgress(SkillType.reading.name),
           writingProgress: getProgress(SkillType.writing.name),
+          onListeningTap: onListeningTap,
+          onSpeakingTap: onSpeakingTap,
           onReadingTap: onReadingTap,
           onWritingTap: onWritingTap,
         );

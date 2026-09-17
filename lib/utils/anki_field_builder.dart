@@ -6,7 +6,9 @@ import '../models/selected_content.dart';
 ///
 /// [content] 完整的文章内容（原文或译文），用于提取上下文行
 /// [selection] 用户的选区信息
-String buildAnkiFrontField(String content, SelectedContent selection) {
+/// [highlightReplacement] 选中部分的替换文本。为空时使用原文，传 '???' 时替换为问号。
+String buildAnkiFrontField(String content, SelectedContent selection,
+    {String highlightReplacement = ''}) {
   final lines = content.split('\n');
   final currentIdx = selection.lineNumber - 1; // 0-based
 
@@ -17,10 +19,12 @@ String buildAnkiFrontField(String content, SelectedContent selection) {
     buffer.write('${lines[i]}<br>');
   }
 
-  // 当前行：用 <mark> 包裹选中文本
+  // 当前行：用 <mark> 包裹选中文本或替换文本
   final line = selection.lineText;
   final before = line.substring(0, selection.start);
-  final selected = line.substring(selection.start, selection.end);
+  final selected = highlightReplacement.isEmpty
+      ? line.substring(selection.start, selection.end)
+      : highlightReplacement;
   final after = line.substring(selection.end);
   buffer.write(before);
   buffer.write('<mark>$selected</mark>');
