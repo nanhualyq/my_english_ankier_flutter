@@ -7,6 +7,7 @@ import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
+import '../widgets/anki_shortcut_mixin.dart';
 import '../widgets/practice_selection_bar.dart';
 import '../widgets/tts_play_button.dart';
 
@@ -20,7 +21,8 @@ class SpeakingPracticePage extends StatefulWidget {
   State<SpeakingPracticePage> createState() => _SpeakingPracticePageState();
 }
 
-class _SpeakingPracticePageState extends State<SpeakingPracticePage> {
+class _SpeakingPracticePageState extends State<SpeakingPracticePage>
+    with AnkiShortcutMixin {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
 
@@ -66,6 +68,15 @@ class _SpeakingPracticePageState extends State<SpeakingPracticePage> {
     _scrollController.dispose();
     super.dispose();
   }
+
+  @override
+  SelectedContent? get selection => _selection;
+
+  @override
+  void onExtractSelection() => _extractSelection();
+
+  @override
+  void onCopyToClipboard() => _copyToClipboard();
 
   /// 处理子组件传递上来的选中事件
   void _onContentSelected(SelectedContent? selection) {
@@ -164,9 +175,10 @@ class _SpeakingPracticePageState extends State<SpeakingPracticePage> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: widget.article.content.isEmpty
-          ? _buildEmptyState(context)
-          : Stack(
+      body: buildWithAnkiShortcuts(
+        child: widget.article.content.isEmpty
+            ? _buildEmptyState(context)
+            : Stack(
               children: [
                 _buildContentList(lines),
                 // 底部浮动选区栏
@@ -184,7 +196,8 @@ class _SpeakingPracticePageState extends State<SpeakingPracticePage> {
                   ),
               ],
             ),
-    );
+        ),
+      );
   }
 
   /// 文章内容为空时显示的提示

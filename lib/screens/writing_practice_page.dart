@@ -7,6 +7,7 @@ import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
+import '../widgets/anki_shortcut_mixin.dart';
 import '../widgets/practice_selection_bar.dart';
 
 /// 写作练习页面，支持逐行显示译文和原文切换，以及文本选中与提取
@@ -19,7 +20,8 @@ class WritingPracticePage extends StatefulWidget {
   State<WritingPracticePage> createState() => _WritingPracticePageState();
 }
 
-class _WritingPracticePageState extends State<WritingPracticePage> {
+class _WritingPracticePageState extends State<WritingPracticePage>
+    with AnkiShortcutMixin {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
 
@@ -65,6 +67,15 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
     _scrollController.dispose();
     super.dispose();
   }
+
+  @override
+  SelectedContent? get selection => _selection;
+
+  @override
+  void onExtractSelection() => _extractSelection();
+
+  @override
+  void onCopyToClipboard() => _copyToClipboard();
 
   /// 处理子组件传递上来的选中事件
   void _onContentSelected(SelectedContent? selection) {
@@ -166,9 +177,10 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: translations.isEmpty
-          ? _buildEmptyState(context)
-          : Stack(
+      body: buildWithAnkiShortcuts(
+        child: translations.isEmpty
+            ? _buildEmptyState(context)
+            : Stack(
               children: [
                 _buildContentList(translations, originalLines),
                 // 底部浮动选区栏
@@ -186,7 +198,8 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
                   ),
               ],
             ),
-    );
+        ),
+      );
   }
 
   /// 译文为空时显示的提示

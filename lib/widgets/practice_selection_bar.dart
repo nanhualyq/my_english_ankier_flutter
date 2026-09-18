@@ -66,7 +66,7 @@ class PracticeSelectionBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.bookmark_add_outlined, size: 20),
-                tooltip: 'Extract',
+                tooltip: 'Extract (Ctrl+E)',
                 onPressed: onExtract,
               ),
               IconButton(
