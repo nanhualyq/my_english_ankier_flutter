@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -14,8 +16,16 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    final localAppData = Platform.environment['LOCALAPPDATA'] ?? '.';
+
+    // Use separate directories for debug and release
+    final appName = kDebugMode ? 'my_english_ankier_flutter_dev' : 'my_english_ankier_flutter';
+    final appDir = join(localAppData, appName);
+
+    // Create directory if it doesn't exist
+    await Directory(appDir).create(recursive: true);
+
+    final path = join(appDir, filePath);
 
     return await openDatabase(
       path,
