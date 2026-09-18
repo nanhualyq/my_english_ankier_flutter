@@ -52,7 +52,7 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
     if (article == null) return;
 
     final updated = article.copyWith(
-      title: _titleController.text.isEmpty ? '未命名文章' : _titleController.text,
+      title: _titleController.text.isEmpty ? 'Untitled Article' : _titleController.text,
       content: _contentController.text,
       translatedContent: _translationController.text.isEmpty
           ? null
@@ -81,12 +81,12 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('编辑文章'),
+        title: const Text('Edit Article'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: _isLoading ? null : _save,
-            tooltip: '保存',
+            tooltip: 'Save',
           ),
         ],
       ),
@@ -99,7 +99,7 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      '标题',
+                      'Title',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -109,13 +109,13 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
                     TextField(
                       controller: _titleController,
                       decoration: const InputDecoration(
-                        hintText: '文章标题',
+                        hintText: 'Article Title',
                         border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '来源 URL（可选）',
+                      'Source URL (Optional)',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -131,7 +131,7 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '英文内容',
+                      'English Content',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -143,14 +143,14 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
                       maxLines: null,
                       minLines: 10,
                       decoration: const InputDecoration(
-                        hintText: '粘贴英文文章内容...',
+                        hintText: 'Paste English article content...',
                         border: OutlineInputBorder(),
                         alignLabelWithHint: true,
                       ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '中文译文（可选）',
+                      'Chinese Translation (Optional)',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -162,7 +162,7 @@ class _ArticleEditPageState extends ConsumerState<ArticleEditPage> {
                       maxLines: null,
                       minLines: 8,
                       decoration: const InputDecoration(
-                        hintText: '粘贴中文翻译...',
+                        hintText: 'Paste Chinese translation...',
                         border: OutlineInputBorder(),
                         alignLabelWithHint: true,
                       ),

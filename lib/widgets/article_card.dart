@@ -59,7 +59,7 @@ class ArticleCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.edit, size: 18),
                           SizedBox(width: 8),
-                          Text('编辑'),
+                          Text('Edit'),
                         ],
                       ),
                     ),
@@ -69,7 +69,7 @@ class ArticleCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.copy, size: 18),
                           SizedBox(width: 8),
-                          Text('另存为'),
+                          Text('Save As'),
                         ],
                       ),
                     ),
@@ -79,7 +79,7 @@ class ArticleCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.refresh, size: 18),
                           SizedBox(width: 8),
-                          Text('重置进度'),
+                          Text('Reset Progress'),
                         ],
                       ),
                     ),
@@ -90,7 +90,7 @@ class ArticleCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.delete, size: 18, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('删除', style: TextStyle(color: Colors.red)),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -134,19 +134,19 @@ class ArticleCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重置进度'),
-        content: Text('确定要重置「${article.title}」的所有学习进度吗？\n文章内容不会受影响。'),
+        title: const Text('Reset Progress'),
+        content: Text('Are you sure you want to reset all learning progress for "${article.title}"?\nArticle content will not be affected.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               onResetProgress();
             },
-            child: const Text('重置', style: TextStyle(color: Colors.orange)),
+            child: const Text('Reset', style: TextStyle(color: Colors.orange)),
           ),
         ],
       ),
@@ -157,19 +157,19 @@ class ArticleCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除文章'),
-        content: Text('确定要删除「${article.title}」吗？\n此操作不可撤销，所有学习进度也会被删除。'),
+        title: const Text('Delete Article'),
+        content: Text('Are you sure you want to delete "${article.title}"?\nThis cannot be undone. All learning progress will also be deleted.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               onDelete();
             },
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

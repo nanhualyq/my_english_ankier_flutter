@@ -20,14 +20,14 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📚 我的英语文章'),
+        title: const Text('📚 My English Articles'),
       ),
       body: articles.isEmpty
           ? _buildEmptyState(context, ref)
           : _buildArticleList(context, ref, articles),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addArticle(context, ref),
-        tooltip: '添加文章',
+        tooltip: 'Add Article',
         child: const Icon(Icons.add),
       ),
     );
@@ -45,14 +45,14 @@ class HomePage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '暂无文章',
+            'No Articles Yet',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            '点击右下角 + 开始添加第一篇文章',
+            'Tap + at the bottom right to add your first article',
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 14,
@@ -90,7 +90,7 @@ class HomePage extends ConsumerWidget {
 
   Future<void> _addArticle(BuildContext context, WidgetRef ref) async {
     final newArticle = Article(
-      title: '未命名文章',
+      title: 'Untitled Article',
       content: '',
       translatedContent: null,
     );
