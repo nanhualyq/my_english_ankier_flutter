@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../database/skill_progress_dao.dart';
 import '../models/article.dart';
 import '../models/selected_content.dart';
+import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
@@ -20,6 +22,49 @@ class WritingPracticePage extends StatefulWidget {
 class _WritingPracticePageState extends State<WritingPracticePage> {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
+
+  /// 滚动控制器，用于恢复上次学习位置
+  final ScrollController _scrollController = ScrollController();
+
+  /// 上次学到的行号（1-based），0 表示无记录
+  int _lastLinePosition = 0;
+
+  final SkillProgressDao _skillProgressDao = SkillProgressDao();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastLinePosition();
+  }
+
+  /// 从数据库读取上次学到的行号，并在首帧后滚动到目标位置
+  Future<void> _loadLastLinePosition() async {
+    if (widget.article.id == null) return;
+    final progress = await _skillProgressDao.getSkillProgress(
+      widget.article.id!,
+      SkillType.writing,
+    );
+    if (!mounted) return;
+    final position = progress?.lastLinePosition ?? 0;
+    setState(() {
+      _lastLinePosition = position;
+    });
+    if (position > 0 && _scrollController.hasClients) {
+      final translations = widget.article.translatedContent?.split('\n') ?? [];
+      final targetIndex = position.clamp(0, translations.length - 1);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(targetIndex * 60.0);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   /// 处理子组件传递上来的选中事件
   void _onContentSelected(SelectedContent? selection) {
@@ -75,6 +120,18 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
         fields: {'Front': front, 'Back': back},
       );
       if (!mounted) return;
+      // 更新学习位置
+      final lineNumber = _selection!.lineNumber;
+      if (widget.article.id != null && lineNumber > _lastLinePosition) {
+        await _skillProgressDao.updateLastLinePosition(
+          widget.article.id!,
+          SkillType.writing,
+          lineNumber,
+        );
+        setState(() {
+          _lastLinePosition = lineNumber;
+        });
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Anki Add Cards dialog opened'),
@@ -97,8 +154,7 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
   @override
   Widget build(BuildContext context) {
     // 解析译文为列表（主内容）
-    final translations =
-        widget.article.translatedContent?.split('\n') ?? [];
+    final translations = widget.article.translatedContent?.split('\n') ?? [];
     // 解析原文为列表（可展开内容）
     final originalLines = widget.article.content.split('\n');
 
@@ -139,17 +195,13 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.translate_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.translate_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Translation is not available',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.grey[600]),
           ),
         ],
       ),
@@ -158,14 +210,18 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
 
   /// 构建内容列表
   Widget _buildContentList(
-      List<String> translations, List<String> originalLines) {
+    List<String> translations,
+    List<String> originalLines,
+  ) {
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       itemCount: translations.length,
       itemBuilder: (context, index) {
         final translation = translations[index];
-        final original =
-            index < originalLines.length ? originalLines[index] : null;
+        final original = index < originalLines.length
+            ? originalLines[index]
+            : null;
 
         return PracticeLineItem(
           lineNumber: index + 1,
@@ -174,6 +230,7 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
           primaryLabel: 'original',
           secondaryLabel: 'original',
           onSelected: _onContentSelected,
+          isLearned: (index + 1) <= _lastLinePosition,
         );
       },
     );
