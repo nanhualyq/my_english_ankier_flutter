@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -9,8 +10,10 @@ void main() async {
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 
-  // Seed database with test data if empty
-  await SeedData.seedIfEmpty();
+  // Seed database with test data if empty (debug only)
+  if (kDebugMode) {
+    await SeedData.seedIfEmpty();
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
