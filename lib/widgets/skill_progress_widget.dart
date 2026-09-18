@@ -76,9 +76,9 @@ class SkillProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _skillItem('🎧', listeningProgress, onTap: onListeningTap),
-        _skillItem('🗣️', speakingProgress, onTap: onSpeakingTap),
         _skillItem('📖', readingProgress, onTap: onReadingTap),
+        _skillItem('🗣️', speakingProgress, onTap: onSpeakingTap),
+        _skillItem('🎧', listeningProgress, onTap: onListeningTap),
         _skillItem('✍️', writingProgress, onTap: onWritingTap),
       ],
     );
