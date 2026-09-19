@@ -5,6 +5,7 @@ import '../models/article.dart';
 import '../models/selected_content.dart';
 import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
+import '../services/youdao_dict_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
 import '../widgets/anki_shortcut_mixin.dart';
@@ -124,11 +125,25 @@ class _SpeakingPracticePageState extends State<SpeakingPracticePage>
     // Back 字段为选中的原文
     final back = _selection!.selectedText;
 
+    // 查询有道词典获取音标
+    String phone = '';
+    try {
+      final youdao = YoudaoDictService();
+      final result = await youdao.lookup(_selection!.selectedText);
+      if (result != null && result.phonetics.isNotEmpty) {
+        phone = result.phonetics
+            .map((p) => '${p.region} /${p.text}/')
+            .join(' ');
+      }
+    } catch (_) {
+      // 查询失败时 phone 为空，不影响流程
+    }
+
     try {
       await anki.guiAddCards(
         deckName: 'English',
         modelName: '@EnSpeak',
-        fields: {'Front': front, 'Back': back},
+        fields: {'Front': front, 'Back': back, 'Phone': phone},
       );
       if (!mounted) return;
       // 更新学习位置
