@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/skill_progress_dao.dart';
 import '../models/article.dart';
+import '../providers/skill_progress_provider.dart';
 import '../models/selected_content.dart';
 import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
@@ -12,16 +14,16 @@ import '../widgets/anki_shortcut_mixin.dart';
 import '../widgets/practice_selection_bar.dart';
 
 /// 阅读练习页面，支持逐行显示原文和译文切换，以及文本选中与提取
-class ReadingPracticePage extends StatefulWidget {
+class ReadingPracticePage extends ConsumerStatefulWidget {
   final Article article;
 
   const ReadingPracticePage({super.key, required this.article});
 
   @override
-  State<ReadingPracticePage> createState() => _ReadingPracticePageState();
+  ConsumerState<ReadingPracticePage> createState() => _ReadingPracticePageState();
 }
 
-class _ReadingPracticePageState extends State<ReadingPracticePage>
+class _ReadingPracticePageState extends ConsumerState<ReadingPracticePage>
     with AnkiShortcutMixin {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
@@ -148,6 +150,7 @@ class _ReadingPracticePageState extends State<ReadingPracticePage>
           SkillType.reading,
           lineNumber,
         );
+        ref.invalidate(skillProgressListProvider(widget.article.id!));
         setState(() {
           _lastLinePosition = lineNumber;
         });

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/skill_progress_dao.dart';
 import '../models/article.dart';
+import '../providers/skill_progress_provider.dart';
 import '../models/selected_content.dart';
 import '../models/skill_type.dart';
 import '../services/anki_connect_service.dart';
@@ -13,16 +15,16 @@ import '../widgets/practice_selection_bar.dart';
 import '../widgets/tts_play_button.dart';
 
 /// 口语练习页面，支持逐行显示原文和 TTS 播放
-class SpeakingPracticePage extends StatefulWidget {
+class SpeakingPracticePage extends ConsumerStatefulWidget {
   final Article article;
 
   const SpeakingPracticePage({super.key, required this.article});
 
   @override
-  State<SpeakingPracticePage> createState() => _SpeakingPracticePageState();
+  ConsumerState<SpeakingPracticePage> createState() => _SpeakingPracticePageState();
 }
 
-class _SpeakingPracticePageState extends State<SpeakingPracticePage>
+class _SpeakingPracticePageState extends ConsumerState<SpeakingPracticePage>
     with AnkiShortcutMixin {
   /// 当前选中的内容，null 表示无选区
   SelectedContent? _selection;
@@ -154,6 +156,7 @@ class _SpeakingPracticePageState extends State<SpeakingPracticePage>
           SkillType.speaking,
           lineNumber,
         );
+        ref.invalidate(skillProgressListProvider(widget.article.id!));
         setState(() {
           _lastLinePosition = lineNumber;
         });

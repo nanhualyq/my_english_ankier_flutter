@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/article.dart';
 import '../models/skill_progress.dart';
 import '../models/skill_type.dart';
-import '../database/skill_progress_dao.dart';
+import '../providers/skill_progress_provider.dart';
 import 'skill_progress_widget.dart';
 
 /// A card displaying article title, skill progress, and a context menu.
@@ -135,7 +135,9 @@ class ArticleCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Progress'),
-        content: Text('Are you sure you want to reset all learning progress for "${article.title}"?\nArticle content will not be affected.'),
+        content: Text(
+          'Are you sure you want to reset all learning progress for "${article.title}"?\nArticle content will not be affected.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -158,7 +160,9 @@ class ArticleCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Article'),
-        content: Text('Are you sure you want to delete "${article.title}"?\nThis cannot be undone. All learning progress will also be deleted.'),
+        content: Text(
+          'Are you sure you want to delete "${article.title}"?\nThis cannot be undone. All learning progress will also be deleted.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -195,46 +199,49 @@ class _ProgressRow extends ConsumerWidget {
     this.onWritingTap,
   });
 
+  double _getProgress(List<SkillProgress> progressList, String skillType) {
+    final matches = progressList.where((p) => p.skillType == skillType);
+    if (matches.isEmpty) return 0;
+    final linePos = matches.first.lastLinePosition;
+    if (totalLines <= 0) return 0;
+    return (linePos / totalLines).clamp(0.0, 1.0);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dao = SkillProgressDao();
+    final progressAsync = ref.watch(skillProgressListProvider(articleId));
 
-    return FutureBuilder<List<SkillProgress>>(
-      future: dao.getSkillProgressForArticle(articleId),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return SkillProgressWidget(
-            listeningProgress: 0,
-            speakingProgress: 0,
-            readingProgress: 0,
-            writingProgress: 0,
-            onListeningTap: onListeningTap,
-            onSpeakingTap: onSpeakingTap,
-            onReadingTap: onReadingTap,
-            onWritingTap: onWritingTap,
-          );
-        }
-
-        final progressList = snapshot.data!;
-        double getProgress(String skillType) {
-          final matches = progressList.where((p) => p.skillType == skillType);
-          if (matches.isEmpty) return 0;
-          final linePos = matches.first.lastLinePosition;
-          if (totalLines <= 0) return 0;
-          return (linePos / totalLines).clamp(0.0, 1.0);
-        }
-
-        return SkillProgressWidget(
-          listeningProgress: getProgress(SkillType.listening.name),
-          speakingProgress: getProgress(SkillType.speaking.name),
-          readingProgress: getProgress(SkillType.reading.name),
-          writingProgress: getProgress(SkillType.writing.name),
-          onListeningTap: onListeningTap,
-          onSpeakingTap: onSpeakingTap,
-          onReadingTap: onReadingTap,
-          onWritingTap: onWritingTap,
-        );
-      },
+    return progressAsync.when(
+      loading: () => SkillProgressWidget(
+        listeningProgress: 0,
+        speakingProgress: 0,
+        readingProgress: 0,
+        writingProgress: 0,
+        onListeningTap: onListeningTap,
+        onSpeakingTap: onSpeakingTap,
+        onReadingTap: onReadingTap,
+        onWritingTap: onWritingTap,
+      ),
+      error: (_, _) => SkillProgressWidget(
+        listeningProgress: 0,
+        speakingProgress: 0,
+        readingProgress: 0,
+        writingProgress: 0,
+        onListeningTap: onListeningTap,
+        onSpeakingTap: onSpeakingTap,
+        onReadingTap: onReadingTap,
+        onWritingTap: onWritingTap,
+      ),
+      data: (progressList) => SkillProgressWidget(
+        listeningProgress: _getProgress(progressList, SkillType.listening.name),
+        speakingProgress: _getProgress(progressList, SkillType.speaking.name),
+        readingProgress: _getProgress(progressList, SkillType.reading.name),
+        writingProgress: _getProgress(progressList, SkillType.writing.name),
+        onListeningTap: onListeningTap,
+        onSpeakingTap: onSpeakingTap,
+        onReadingTap: onReadingTap,
+        onWritingTap: onWritingTap,
+      ),
     );
   }
 }
