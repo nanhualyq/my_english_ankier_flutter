@@ -44,10 +44,11 @@ class YoudaoDictResult {
 
   /// 将所有词性释义格式化为 Anki Back 字段内容
   ///
-  /// 格式：每行一个 `词性 释义`
+  /// 格式：每个 `词性 释义` 之间用 `<br>` 分隔
+  /// （Anki 模板以 HTML 渲染字段内容，`\n` 不会产生换行，必须使用 `<br>`）
   String toBackField() {
     if (entries.isEmpty) return '';
-    return entries.map((e) => '${e.pos} ${e.tran}').join('\n');
+    return entries.map((e) => '${e.pos} ${e.tran}').join('<br>');
   }
 }
 

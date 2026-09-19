@@ -4,6 +4,10 @@ import '../models/selected_content.dart';
 ///
 /// 格式：最多3行上方上下文 + 当前行（选中部分用 <mark> 包裹）+ 隐藏时间戳
 ///
+/// **Anki 字段换行规则**：所有发送到 Anki 的字段内容中，行间分隔必须使用
+/// `<br>` 而非 `\n`。Anki 模板以 HTML 渲染字段内容，`\n` 不会产生换行效果。
+/// 此规则适用于 Front、Back 等所有字段。
+///
 /// [content] 完整的文章内容（原文或译文），用于提取上下文行
 /// [selection] 用户的选区信息
 /// [highlightReplacement] 选中部分的替换文本。为空时使用原文，传 '???' 时替换为问号。
