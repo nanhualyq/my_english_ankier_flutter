@@ -152,7 +152,13 @@ class _ListeningPracticePageState extends ConsumerState<ListeningPracticePage>
       await anki.guiAddCards(
         deckName: 'English',
         modelName: '@EnListen',
-        fields: {'Front': front, 'Back': back, 'Phone': phone},
+        fields: {
+          'Front': front,
+          'Back': back,
+          'Phone': phone,
+          'Title': widget.article.title,
+          'Url': widget.article.url ?? '',
+        },
       );
       if (!mounted) return;
       // 更新学习位置

@@ -130,7 +130,12 @@ class _WritingPracticePageState extends ConsumerState<WritingPracticePage>
       await anki.guiAddCards(
         deckName: 'English',
         modelName: '@Basic',
-        fields: {'Front': front, 'Back': back},
+        fields: {
+          'Front': front,
+          'Back': back,
+          'Title': widget.article.title,
+          'Url': widget.article.url ?? '',
+        },
       );
       if (!mounted) return;
       // 更新学习位置

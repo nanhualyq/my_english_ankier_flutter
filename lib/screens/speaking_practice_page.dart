@@ -145,7 +145,13 @@ class _SpeakingPracticePageState extends ConsumerState<SpeakingPracticePage>
       await anki.guiAddCards(
         deckName: 'English',
         modelName: '@EnSpeak',
-        fields: {'Front': front, 'Back': back, 'Phone': phone},
+        fields: {
+          'Front': front,
+          'Back': back,
+          'Phone': phone,
+          'Title': widget.article.title,
+          'Url': widget.article.url ?? '',
+        },
       );
       if (!mounted) return;
       // 更新学习位置

@@ -52,6 +52,8 @@
 - **THEN** 系统打开 Anki 的添加卡片界面，deck 为 "English"，notetype 为 "@EnSpeak"
 - **AND** Front 字段包含当前行上下文（最多3行上方上下文），当前行的选中部分用 `<mark>` 包裹
 - **AND** Back 字段包含选中的原文文本
+- **AND** title 字段包含当前文章的标题
+- **AND** url 字段包含当前文章的 URL（若文章无 URL 则为空字符串）
 
 #### Scenario: AnkiConnect 不可用
 - **WHEN** 用户点击提取按钮但 AnkiConnect 服务不可用

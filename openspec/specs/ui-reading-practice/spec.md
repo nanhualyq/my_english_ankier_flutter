@@ -157,6 +157,8 @@
 #### Scenario: 成功打开 Anki 添加界面
 - **WHEN** 用户选中文本并点击"Extract"按钮，且 Anki 已运行且 AnkiConnect 插件已安装
 - **THEN** 系统调用 `guiAddCards` API，Anki 打开添加卡片对话框，Front 字段已预填内容，Back 字段为空
+- **AND** title 字段包含当前文章的标题
+- **AND** url 字段包含当前文章的 URL（若文章无 URL 则为空字符串）
 
 #### Scenario: Anki 未运行
 - **WHEN** 用户点击"Extract"按钮，但 Anki 未运行或 AnkiConnect 不可用
