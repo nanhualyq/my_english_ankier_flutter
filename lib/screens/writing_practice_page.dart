@@ -123,8 +123,12 @@ class _WritingPracticePageState extends ConsumerState<WritingPracticePage>
     final translatedContent = widget.article.translatedContent ?? '';
     final front = buildAnkiFrontField(translatedContent, _selection!);
 
-    // Back 字段为空（写作页面不查询有道词典）
-    const back = '';
+    // Back 字段：对应原文行
+    final originalLines = widget.article.content.split('\n');
+    final lineIndex = _selection!.lineNumber - 1;
+    final back = (lineIndex >= 0 && lineIndex < originalLines.length)
+        ? originalLines[lineIndex]
+        : '';
 
     try {
       await anki.guiAddCards(

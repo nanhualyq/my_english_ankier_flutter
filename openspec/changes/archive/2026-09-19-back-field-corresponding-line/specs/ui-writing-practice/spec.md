@@ -1,8 +1,4 @@
-## Purpose
-
-提供写作练习界面，让用户通过中译英的方式训练写作能力。每行显示译文原文，用户可展开查看英文原文，并选中需要重点练习的部分发送到 Anki。
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: 提取选中内容到 Anki
 用户选中文本后，必须能够将选中内容发送到 Anki 的添加卡片界面。

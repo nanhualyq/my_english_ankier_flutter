@@ -127,6 +127,13 @@ class _ReadingPracticePageState extends ConsumerState<ReadingPracticePage>
       final result = await youdao.lookup(_selection!.selectedText);
       if (result != null && result.hasEntries) {
         back = result.toBackField();
+      } else {
+        // 有道查询为空时，用对应译文行作为兜底
+        final translations = widget.article.translatedContent?.split('\n') ?? [];
+        final lineIndex = _selection!.lineNumber - 1;
+        if (lineIndex >= 0 && lineIndex < translations.length) {
+          back = translations[lineIndex];
+        }
       }
     } catch (_) {
       // 查询失败时 back 为空，不影响流程
