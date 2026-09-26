@@ -2,10 +2,14 @@
 
 为练习页面提供键盘快捷键支持，让用户可以通过 `Ctrl+E` 快速触发 Anki 提取操作，提升学习效率。
 
+## Technical Decisions
+
+- 使用 `SingleActivator` 而非 `LogicalKeySet` 绑定快捷键。`LogicalKeySet` 存在修饰键状态残留的 bug：按下 Ctrl+E 后若 Ctrl 先松开，后续仅按 Ctrl 也会误触发回调。`SingleActivator` 正确管理 key down/up 生命周期，避免此问题。
+
 ## Requirements
 
 ### Requirement: Keyboard shortcut for Anki extract
-用户在练习页面选中文本后，可以通过键盘快捷键 `Ctrl+E` 触发 Anki 提取操作，无需点击底部栏的 Extract 按钮。
+用户在练习页面选中文本后，可以通过键盘快捷键 `Ctrl+E` 触发 Anki 提取操作，无需点击底部栏的 Extract 按钮。快捷键绑定 SHALL 使用 `SingleActivator` 以避免修饰键状态残留问题。
 
 #### Scenario: Shortcut triggers extract when selection exists
 - **WHEN** 用户在练习页面选中了一段文本

@@ -44,10 +44,7 @@ mixin AnkiShortcutMixin<T extends StatefulWidget> on State<T> {
   Widget buildWithAnkiShortcuts({required Widget child}) {
     return CallbackShortcuts(
       bindings: {
-        LogicalKeySet(
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.keyE,
-        ): () {
+        SingleActivator(LogicalKeyboardKey.keyE, control: true): () {
           if (selection != null) onExtractSelection();
         },
       },
