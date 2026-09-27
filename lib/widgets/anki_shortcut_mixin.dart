@@ -16,13 +16,10 @@ import '../models/selected_content.dart';
 ///   void onExtractSelection() => _extractSelection();
 ///
 ///   @override
-///   void onCopyToClipboard() => _copyToClipboard();
-///
-///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: buildWithAnkiShortcuts(
-///         child: Stack(/* ... */),
+///         child: /* ... */,
 ///       ),
 ///     );
 ///   }
@@ -34,9 +31,6 @@ mixin AnkiShortcutMixin<T extends StatefulWidget> on State<T> {
 
   /// 触发 Anki 提取操作
   void onExtractSelection();
-
-  /// 复制选中文本到剪贴板
-  void onCopyToClipboard();
 
   /// 包裹子类的 body 内容，添加键盘快捷键支持
   ///

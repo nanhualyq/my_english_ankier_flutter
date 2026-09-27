@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/skill_progress_dao.dart';
 import '../models/article.dart';
@@ -11,7 +10,6 @@ import '../services/youdao_dict_service.dart';
 import '../utils/anki_field_builder.dart';
 import '../widgets/practice_line_item.dart';
 import '../widgets/anki_shortcut_mixin.dart';
-import '../widgets/practice_selection_bar.dart';
 import '../widgets/tts_play_button.dart';
 
 /// 口语练习页面，支持逐行显示原文和 TTS 播放
@@ -78,28 +76,11 @@ class _SpeakingPracticePageState extends ConsumerState<SpeakingPracticePage>
   @override
   void onExtractSelection() => _extractSelection();
 
-  @override
-  void onCopyToClipboard() => _copyToClipboard();
-
   /// 处理子组件传递上来的选中事件
   void _onContentSelected(SelectedContent? selection) {
     setState(() {
       _selection = selection;
     });
-  }
-
-  /// 复制选中文本到剪贴板
-  Future<void> _copyToClipboard() async {
-    if (_selection == null) return;
-    await Clipboard.setData(ClipboardData(text: _selection!.selectedText));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied: ${_selection!.selectedText}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   /// 发送选中内容到 Anki 的添加卡片界面
@@ -202,24 +183,7 @@ class _SpeakingPracticePageState extends ConsumerState<SpeakingPracticePage>
       body: buildWithAnkiShortcuts(
         child: widget.article.content.isEmpty
             ? _buildEmptyState(context)
-            : Stack(
-              children: [
-                _buildContentList(lines),
-                // 底部浮动选区栏
-                if (_selection != null)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: PracticeSelectionBar(
-                      selection: _selection!,
-                      onCopy: _copyToClipboard,
-                      onExtract: _extractSelection,
-                      onDismiss: () => _onContentSelected(null),
-                    ),
-                  ),
-              ],
-            ),
+            : _buildContentList(lines),
         ),
       );
   }
@@ -247,7 +211,7 @@ class _SpeakingPracticePageState extends ConsumerState<SpeakingPracticePage>
   Widget _buildContentList(List<String> lines) {
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       itemCount: lines.length,
       itemBuilder: (context, index) {
         final line = lines[index];
